@@ -1,0 +1,50 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Patient History</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  </head>
+  <body class="bg-light">
+    <div class="container mt-4">
+      <a class="btn btn-secondary mb-3" href="{{ url_for('doctor_dashboard') }}">Back to Dashboard</a>
+      <h3>Patient: {{ patient.name }}</h3>
+      <p><strong>Email:</strong> {{ patient.email }}</p>
+      <p><strong>Phone:</strong> {{ patient.phone }}</p>
+
+      <h5 class="mt-4">Appointments & Treatments</h5>
+      {% if appointments %}
+        <div class="list-group">
+          {% for a in appointments %}
+            <div class="list-group-item">
+              <div class="d-flex w-100 justify-content-between">
+                <h6 class="mb-1">Appointment #{{ a.id }} — {{ a.date }} {{ a.time }}</h6>
+                <small>Status: {{ a.status }}</small>
+              </div>
+              <p class="mb-1">
+                Doctor: 
+                {% if doctors_info.get(a.id) %}
+                  {{ doctors_info[a.id].name }} ({{ doctors_info[a.id].specialization }})
+                {% else %}
+                  Doctor #{{ a.doctor_id }}
+                {% endif %}
+                — Reason: {{ a.reason }}</p>
+              {% if treatments.get(a.id) %}
+                <div class="mt-2">
+                  <strong>Diagnosis:</strong> {{ treatments[a.id].diagnosis }}<br>
+                  <strong>Prescription:</strong> {{ treatments[a.id].prescription }}<br>
+                  <strong>Notes:</strong> {{ treatments[a.id].notes }}
+                </div>
+              {% else %}
+                <small class="text-muted">No treatment record yet.</small>
+              {% endif %}
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p>No appointments found.</p>
+      {% endif %}
+    </div>
+  </body>
+</html>

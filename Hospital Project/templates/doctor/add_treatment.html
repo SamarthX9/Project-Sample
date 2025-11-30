@@ -1,0 +1,50 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Add Treatment</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  </head>
+  <body class="bg-light">
+    <div class="container mt-4">
+      <a class="btn btn-secondary mb-3" href="{{ url_for('doctor_dashboard') }}">Back to Dashboard</a>
+      <h3>Add Treatment Record</h3>
+
+      <div class="card mb-3">
+        <div class="card-body">
+          <p><strong>Appointment ID:</strong> {{ appointment.id }}</p>
+          <p><strong>Patient ID:</strong> {{ appointment.patient_id }}</p>
+          <p><strong>Date:</strong> {{ appointment.date }} {{ appointment.time }}</p>
+          <p><strong>Reason:</strong> {{ appointment.reason }}</p>
+          <p><strong>Status:</strong> {{ appointment.status }}</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-body">
+          <form method="post" action="{{ url_for('doctor_add_treatment', appt_id=appointment.id) }}">
+            <div class="mb-3">
+              <label class="form-label"><strong>Diagnosis</strong></label>
+              <textarea name="diagnosis" class="form-control" rows="3" required>{{ treatment.diagnosis if treatment else '' }}</textarea>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label"><strong>Prescription</strong></label>
+              <textarea name="prescription" class="form-control" rows="3">{{ treatment.prescription if treatment else '' }}</textarea>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label"><strong>Doctor Notes</strong></label>
+              <textarea name="notes" class="form-control" rows="3">{{ treatment.notes if treatment else '' }}</textarea>
+            </div>
+
+            <div class="d-grid">
+              <button type="submit" class="btn btn-success">Save Treatment</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

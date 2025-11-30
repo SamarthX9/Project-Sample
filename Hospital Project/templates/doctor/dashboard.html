@@ -1,0 +1,232 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Doctor Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  </head>
+  <body class="bg-light">
+    <div class="container mt-4">
+      <div class="d-flex justify-content-between align-items-center">
+        <h3>Doctor Dashboard</h3>
+        <div>
+          <a class="btn btn-warning me-2" href="{{ url_for('doctor_profile') }}">Edit Profile</a>
+          <a class="btn btn-secondary" href="{{ url_for('logout') }}">Logout</a>
+        </div>
+      </div>
+
+      <div class="card mt-3 mb-3">
+        <div class="card-body">
+          <h5>Welcome, {{ doctor.name if doctor else 'Doctor' }}</h5>
+          <div class="row mt-3">
+            <div class="col-md-4">
+              <div class="alert alert-warning mb-0">
+                <h6 class="mb-1">Ongoing Appointments</h6>
+                <h3 class="mb-0">{{ booked_count }}</h3>
+                <small class="text-muted">Status: Booked</small>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="alert alert-success mb-0">
+                <h6 class="mb-1">Completed Appointments</h6>
+                <h3 class="mb-0">{{ completed_count }}</h3>
+                <small class="text-muted">Status: Completed with Treatment</small>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="alert alert-info mb-0">
+                <h6 class="mb-1">This Week</h6>
+                <h3 class="mb-0">{{ week_appts|length }}</h3>
+                <small class="text-muted">Next 7 days</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-8">
+          <div class="card mb-3">
+            <div class="card-body">
+              <h5>All Appointments</h5>
+              {% if upcoming %}
+                <div class="accordion" id="appointmentAccordion">
+                  {% for a in upcoming %}
+                    <div class="accordion-item">
+                      <h2 class="accordion-header">
+                        <button class="accordion-button {% if a.status == 'Completed' %}collapsed{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#appt{{ a.id }}">
+                          <div class="d-flex justify-content-between w-100">
+                            <span>
+                              <strong>Appt #{{ a.id }}</strong> — 
+                              {% if patients_info.get(a.id) %}
+                                {{ patients_info[a.id].name }}
+                              {% else %}
+                                Patient #{{ a.patient_id }}
+                              {% endif %}
+                              ({{ a.date }} {{ a.time }})
+                            </span>
+                            <span class="ms-3">
+                              {% if treatments.get(a.id) %}
+                                <span class="badge bg-success">✓ Treatment Added</span>
+                              {% else %}
+                                <span class="badge bg-{{ 'warning' if a.status == 'Booked' else 'success' if a.status == 'Completed' else 'danger' }}">{{ a.status }}</span>
+                              {% endif %}
+                            </span>
+                          </div>
+                        </button>
+                      </h2>
+                      <div id="appt{{ a.id }}" class="accordion-collapse collapse {% if a.status != 'Completed' %}show{% endif %}" data-bs-parent="#appointmentAccordion">
+                        <div class="accordion-body">
+                          <div class="mb-3">
+                            <h6><strong>Patient Issue/Reason:</strong></h6>
+                            <p class="text-muted">{{ a.reason }}</p>
+                          </div>
+                          
+                          {% if a.status == 'Completed' and treatments.get(a.id) %}
+                            <div class="alert alert-info mb-3">
+                              <h6 class="alert-heading">Treatment Details</h6>
+                              <div class="mt-2">
+                                <p><strong>Diagnosis:</strong></p>
+                                <p>{{ treatments[a.id].diagnosis }}</p>
+                              </div>
+                              {% if treatments[a.id].prescription %}
+                                <div class="mt-2">
+                                  <p><strong>Prescription:</strong></p>
+                                  <p>{{ treatments[a.id].prescription }}</p>
+                                </div>
+                              {% endif %}
+                              {% if treatments[a.id].notes %}
+                                <div class="mt-2">
+                                  <p><strong>Notes:</strong></p>
+                                  <p>{{ treatments[a.id].notes }}</p>
+                                </div>
+                              {% endif %}
+                            </div>
+                          {% endif %}
+                          
+                          <div class="mt-3">
+                            {% if not treatments.get(a.id) %}
+                              <a class="btn btn-sm btn-success" href="{{ url_for('doctor_add_treatment', appt_id=a.id) }}">Add Treatment</a>
+                            {% else %}
+                              <a class="btn btn-sm btn-warning" href="{{ url_for('doctor_add_treatment', appt_id=a.id) }}">Edit Treatment</a>
+                            {% endif %}
+                            
+                            <form method="post" action="{{ url_for('doctor_update_appointment_status', appt_id=a.id) }}" class="d-inline me-2">
+                              <select name="status" class="form-select form-select-sm d-inline" style="width:130px; display:inline-block;">
+                                <option value="Booked" {% if a.status == 'Booked' %}selected{% endif %}>Booked</option>
+                                <option value="Completed" {% if a.status == 'Completed' %}selected{% endif %}>Completed</option>
+                                <option value="Cancelled" {% if a.status == 'Cancelled' %}selected{% endif %}>Cancelled</option>
+                              </select>
+                              <button class="btn btn-sm btn-primary" type="submit">Update Status</button>
+                            </form>
+                            
+                            <a class="btn btn-sm btn-info" href="{{ url_for('doctor_view_patient_history', pat_id=a.patient_id) }}">Patient History</a>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  {% endfor %}
+                </div>
+              {% else %}
+                <p>No appointments.</p>
+              {% endif %}
+            </div>
+          </div>
+
+        </div>
+
+        <div class="col-md-4">
+          <div class="card mb-3">
+            <div class="card-body">
+              <h5>Set Availability (Next 7 Days)</h5>
+              <form method="post" action="{{ url_for('doctor_add_availability') }}">
+                <div class="mb-2">
+                  <label class="form-label">From Date</label>
+                  <input type="date" name="start_date" class="form-control form-control-sm" id="startDate" required>
+                </div>
+                <div class="mb-2">
+                  <label class="form-label">To Date</label>
+                  <input type="date" name="end_date" class="form-control form-control-sm" id="endDate" required>
+                </div>
+                <div class="mb-2">
+                  <label class="form-label">Start Time</label>
+                  <input type="time" name="start_time" class="form-control form-control-sm" required>
+                </div>
+                <div class="mb-2">
+                  <label class="form-label">End Time</label>
+                  <input type="time" name="end_time" class="form-control form-control-sm" required>
+                </div>
+                <div class=\"d-grid\">
+                  <button class=\"btn btn-success\" type=\"submit\">Set Availability</button>
+                </div>
+              </form>
+              <small class=\"text-muted mt-2 d-block\">Set your availability for a date range within the next 7 days.</small>
+              
+              <script>
+                // Restrict date pickers to next 7 days
+                const startDateInput = document.getElementById('startDate');
+                const endDateInput = document.getElementById('endDate');
+                const today = new Date();
+                const minDate = today.toISOString().split('T')[0];
+                const maxDate = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+                
+                startDateInput.setAttribute('min', minDate);
+                startDateInput.setAttribute('max', maxDate);
+                endDateInput.setAttribute('min', minDate);
+                endDateInput.setAttribute('max', maxDate);
+                
+                // Update end date min when start date changes
+                startDateInput.addEventListener('change', function() {
+                  endDateInput.setAttribute('min', this.value);
+                  if (endDateInput.value && endDateInput.value < this.value) {
+                    endDateInput.value = this.value;
+                  }
+                });
+              </script>
+            </div>
+          </div>
+
+          <div class="card mb-3">
+            <div class="card-body">
+              <h5>Current Availability</h5>
+              {% if availability %}
+                <div class="list-group list-group-flush">
+                  {% for avail in availability %}
+                    <div class="list-group-item">
+                      <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                          <strong>{{ avail.start_date }} to {{ avail.end_date }}</strong><br>
+                          <small class="text-muted">{{ avail.start_time }} - {{ avail.end_time }}</small>
+                        </div>
+                        <a href="{{ url_for('doctor_delete_availability', avail_id=avail.id) }}" class="btn btn-sm btn-danger" onclick="return confirm('Delete this availability?')">Delete</a>
+                      </div>
+                    </div>
+                  {% endfor %}
+                </div>
+              {% else %}
+                <p class="text-muted">No availability set yet.</p>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-body">
+              <h5>Patients</h5>
+              {% if patients %}
+                <ul class="list-group list-group-flush">
+                  {% for p in patients %}
+                    <li class="list-group-item">{{ p.name }} (ID {{ p.id }})</li>
+                  {% endfor %}
+                </ul>
+              {% else %}
+                <p>No patients yet.</p>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>

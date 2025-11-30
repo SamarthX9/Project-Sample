@@ -1,0 +1,80 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>My Appointments</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  </head>
+  <body class="bg-light">
+    <div class="container mt-4">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3>My Appointments</h3>
+        <a class="btn btn-secondary" href="{{ url_for('patient_dashboard') }}">Back</a>
+      </div>
+
+      {% if appointments %}
+        {% for a in appointments %}
+          <div class="card mb-3">
+            <div class="card-header">
+              <div class="d-flex justify-content-between">
+                <span><strong>Appointment #{{ a.id }}</strong> — {{ a.date }} at {{ a.time }}</span>
+                <span class="badge bg-{% if a.status == 'Completed' %}success{% elif a.status == 'Booked' %}warning{% else %}danger{% endif %}">{{ a.status }}</span>
+              </div>
+            </div>
+            <div class="card-body">
+              <p><strong>Doctor:</strong> 
+                {% if doctors_info.get(a.id) %}
+                  {{ doctors_info[a.id].name }} ({{ doctors_info[a.id].specialization }})
+                {% else %}
+                  Doctor #{{ a.doctor_id }}
+                {% endif %}
+              </p>
+              <p><strong>Reason for Visit:</strong> {{ a.reason }}</p>
+
+              {% if a.status == 'Completed' and treatments.get(a.id) %}
+                <div class="alert alert-info mt-3">
+                  <h6 class="alert-heading">Doctor's Treatment & Feedback</h6>
+                  
+                  <div class="mt-3">
+                    <h6 class="fw-bold">Diagnosis:</h6>
+                    <p>{{ treatments[a.id].diagnosis }}</p>
+                  </div>
+
+                  {% if treatments[a.id].prescription %}
+                    <div class="mt-3">
+                      <h6 class="fw-bold">Prescription:</h6>
+                      <p>{{ treatments[a.id].prescription }}</p>
+                    </div>
+                  {% endif %}
+
+                  {% if treatments[a.id].notes %}
+                    <div class="mt-3">
+                      <h6 class="fw-bold">Additional Notes:</h6>
+                      <p>{{ treatments[a.id].notes }}</p>
+                    </div>
+                  {% endif %}
+                </div>
+              {% elif a.status == 'Completed' %}
+                <div class="alert alert-warning mt-3">
+                  This appointment has been completed, but the doctor hasn't added treatment details yet. Check back soon!
+                </div>
+              {% endif %}
+
+              <div class="mt-3">
+                {% if a.status == 'Booked' %}
+                  <a class="btn btn-sm btn-outline-primary" href="{{ url_for('patient_reschedule_appointment', appt_id=a.id) }}">Reschedule</a>
+                  <a class="btn btn-sm btn-outline-danger" href="{{ url_for('patient_cancel_appointment', appt_id=a.id) }}">Cancel</a>
+                {% elif a.status == 'Completed' and treatments.get(a.id) %}
+                  <a class="btn btn-sm btn-outline-info" href="{{ url_for('patient_view_treatment', appt_id=a.id) }}">View Full Details</a>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      {% else %}
+        <p>No appointments found. <a href="{{ url_for('patient_search_doctors') }}">Book one now!</a></p>
+      {% endif %}
+    </div>
+  </body>
+</html>

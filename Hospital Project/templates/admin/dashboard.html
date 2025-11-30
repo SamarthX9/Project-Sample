@@ -1,0 +1,74 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Admin Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  </head>
+  <body class="bg-light">
+    <div class="container mt-4">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3>Admin Dashboard</h3>
+        <a class="btn btn-secondary" href="{{ url_for('logout') }}">Logout</a>
+      </div>
+
+      <div class="row mb-4">
+        <div class="col-md-4">
+          <div class="card text-center">
+            <div class="card-body">
+              <h5 class="card-title">Doctors</h5>
+              <p class="display-4">{{ total_doctors }}</p>
+              <a class="btn btn-primary" href="{{ url_for('admin_doctors') }}">Manage</a>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card text-center">
+            <div class="card-body">
+              <h5 class="card-title">Patients</h5>
+              <p class="display-4">{{ total_patients }}</p>
+              <a class="btn btn-primary" href="{{ url_for('admin_patients') }}">Manage</a>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card text-center">
+            <div class="card-body">
+              <h5 class="card-title">Appointments</h5>
+              <p class="display-4">{{ total_appointments }}</p>
+              <a class="btn btn-primary" href="{{ url_for('admin_appointments') }}">Manage</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-header">
+              <h5>Quick Actions</h5>
+            </div>
+            <div class="card-body">
+              <a class="btn btn-outline-primary w-100 mb-2" href="{{ url_for('register_doctor') }}">Add New Doctor</a>
+              <a class="btn btn-outline-primary w-100 mb-2" href="{{ url_for('admin_doctors') }}">View All Doctors</a>
+              <a class="btn btn-outline-primary w-100 mb-2" href="{{ url_for('admin_patients') }}">View All Patients</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-header">
+              <h5>System Info</h5>
+            </div>
+            <div class="card-body">
+              <p><strong>Hospital Management System</strong></p>
+              <p class="text-muted">Manage doctors, patients, appointments, and treatments efficiently.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

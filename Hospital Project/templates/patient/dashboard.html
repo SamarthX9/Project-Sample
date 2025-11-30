@@ -1,0 +1,157 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Patient Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  </head>
+  <body class="bg-light">
+    <div class="container mt-4">
+      <div class="d-flex justify-content-between align-items-center">
+        <h3>Patient Dashboard</h3>
+        <div>
+          <a class="btn btn-warning me-2" href="{{ url_for('patient_profile') }}">Edit Profile</a>
+          <a class="btn btn-secondary" href="{{ url_for('logout') }}">Logout</a>
+        </div>
+      </div>
+
+      <div class="card mt-3 mb-3">
+        <div class="card-body">
+          <h5>Welcome, {{ patient.name if patient else 'Patient' }}</h5>
+          <p><strong>Email:</strong> {{ patient.email }}</p>
+          <p><strong>Phone:</strong> {{ patient.phone }}</p>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6">
+          <div class="card mb-3">
+            <div class="card-body">
+              <h5>Appointments</h5>
+              <a class="btn btn-primary mb-2" href="{{ url_for('patient_search_doctors') }}">Search & Book Appointment</a>
+              <a class="btn btn-info mb-2" href="{{ url_for('patient_appointments') }}">View All Appointments</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <div class="card mb-3">
+            <div class="card-body">
+              <h5>Departments</h5>
+              {% if departments %}
+                <ul class="list-group">
+                  {% for d in departments %}
+                    <li class="list-group-item">{{ d.name }}</li>
+                  {% endfor %}
+                </ul>
+              {% else %}
+                <p>No departments available.</p>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-12">
+          <div class="card mb-3">
+            <div class="card-header">
+              <h5>Completed Appointments & Treatment History</h5>
+            </div>
+            <div class="card-body">
+              {% if completed_appts %}
+                {% for a in completed_appts %}
+                  <div class="card mb-3 border-success">
+                    <div class="card-header bg-success text-white">
+                      <strong>Appointment #{{ a.id }}</strong> — {{ a.date }} at {{ a.time }}
+                      {% if treatments.get(a.id) %}
+                        <span class="badge bg-light text-success ms-2">✓ Treatment Completed</span>
+                      {% endif %}
+                    </div>
+                    <div class="card-body">
+                      {% if doctors_info.get(a.id) %}
+                        <p><strong>Doctor:</strong> {{ doctors_info[a.id].name }} ({{ doctors_info[a.id].specialization }})</p>
+                      {% else %}
+                        <p><strong>Doctor ID:</strong> {{ a.doctor_id }}</p>
+                      {% endif %}
+                      <p><strong>Reason:</strong> {{ a.reason }}</p>
+                      
+                      {% if treatments.get(a.id) %}
+                        <div class="alert alert-info">
+                          <h6>Doctor's Feedback & Prescription</h6>
+                          <div class="mt-2">
+                            <p><strong>Diagnosis:</strong></p>
+                            <p class="text-muted">{{ treatments[a.id].diagnosis }}</p>
+                          </div>
+                          {% if treatments[a.id].prescription %}
+                            <div class="mt-2">
+                              <p><strong>Prescription:</strong></p>
+                              <p class="text-muted">{{ treatments[a.id].prescription }}</p>
+                            </div>
+                          {% endif %}
+                          {% if treatments[a.id].notes %}
+                            <div class="mt-2">
+                              <p><strong>Doctor's Notes:</strong></p>
+                              <p class="text-muted">{{ treatments[a.id].notes }}</p>
+                            </div>
+                          {% endif %}
+                        </div>
+                      {% else %}
+                        <div class="alert alert-warning">
+                          Doctor has not added treatment details yet.
+                        </div>
+                      {% endif %}
+                    </div>
+                  </div>
+                {% endfor %}
+              {% else %}
+                <p>No completed appointments yet.</p>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-12">
+          <div class="card">
+            <div class="card-header">
+              <h5>Upcoming Appointments</h5>
+            </div>
+            <div class="card-body">
+              {% if upcoming_appts %}
+                <table class="table table-sm">
+                  <thead><tr><th>Date</th><th>Time</th><th>Doctor</th><th>Reason</th><th>Status</th><th>Action</th></tr></thead>
+                  <tbody>
+                    {% for a in upcoming_appts %}
+                      <tr>
+                        <td>{{ a.date }}</td>
+                        <td>{{ a.time }}</td>
+                        <td>
+                          {% if doctors_info.get(a.id) %}
+                            {{ doctors_info[a.id].name }}
+                          {% else %}
+                            Doctor #{{ a.doctor_id }}
+                          {% endif %}
+                        </td>
+                        <td>{{ a.reason }}</td>
+                        <td><span class="badge bg-warning">{{ a.status }}</span></td>
+                        <td>
+                          <a class="btn btn-sm btn-outline-primary" href="{{ url_for('patient_reschedule_appointment', appt_id=a.id) }}">Reschedule</a>
+                          <a class="btn btn-sm btn-outline-danger" href="{{ url_for('patient_cancel_appointment', appt_id=a.id) }}">Cancel</a>
+                        </td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              {% else %}
+                <p>No upcoming appointments. <a href="{{ url_for('patient_search_doctors') }}">Book one now!</a></p>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

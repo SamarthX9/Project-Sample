@@ -1,0 +1,56 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Edit Profile - Doctor</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  </head>
+  <body class="bg-light">
+    <div class="container mt-4">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3>Edit Your Profile</h3>
+        <a class="btn btn-secondary" href="{{ url_for('doctor_dashboard') }}">Back to Dashboard</a>
+      </div>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="alert alert-{{ 'success' if category == 'success' else 'danger' if category == 'danger' else 'warning' }} alert-dismissible fade show" role="alert">
+              {{ message }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      <div class="row">
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-body">
+              <form method="post" action="{{ url_for('doctor_profile') }}">
+                <div class="mb-3">
+                  <label class="form-label">Name</label>
+                  <input type="text" class="form-control" name="name" value="{{ doctor.name }}" placeholder="Enter your name">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Email (Read-only)</label>
+                  <input type="email" class="form-control" value="{{ doctor.email }}" disabled>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Phone</label>
+                  <input type="text" class="form-control" name="phone" value="{{ doctor.phone or '' }}" placeholder="Enter your phone">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Specialization</label>
+                  <input type="text" class="form-control" name="specialization" value="{{ doctor.specialization or '' }}" placeholder="e.g., Cardiology">
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Update Profile</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

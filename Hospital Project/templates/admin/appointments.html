@@ -1,0 +1,69 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Appointments - Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  </head>
+  <body class="bg-light">
+    <div class="container mt-4">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3>Appointments</h3>
+        <a class="btn btn-secondary" href="{{ url_for('admin_dashboard') }}">Back</a>
+      </div>
+
+      {% if appointments %}
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Patient</th>
+              <th>Doctor</th>
+              <th>Date</th>
+              <th>Time</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for a in appointments %}
+              <tr>
+                <td>{{ a.id }}</td>
+                <td>
+                  {% if patients_info.get(a.patient_id) %}
+                    {{ patients_info[a.patient_id].name }}
+                  {% else %}
+                    Patient #{{ a.patient_id }}
+                  {% endif %}
+                </td>
+                <td>
+                  {% if doctors_info.get(a.doctor_id) %}
+                    {{ doctors_info[a.doctor_id].name }} ({{ doctors_info[a.doctor_id].specialization }})
+                  {% else %}
+                    Doctor #{{ a.doctor_id }}
+                  {% endif %}
+                </td>
+                <td>{{ a.date }}</td>
+                <td>{{ a.time }}</td>
+                <td>{{ a.status }}</td>
+                <td>
+                  <form method="post" action="{{ url_for('admin_update_appointment_status', appt_id=a.id) }}" class="d-inline">
+                    <select name="status" class="form-select form-select-sm d-inline" style="width:140px; display:inline-block;">
+                      <option value="Booked" {% if a.status=='Booked' %}selected{% endif %}>Booked</option>
+                      <option value="Completed" {% if a.status=='Completed' %}selected{% endif %}>Completed</option>
+                      <option value="Cancelled" {% if a.status=='Cancelled' %}selected{% endif %}>Cancelled</option>
+                    </select>
+                    <button class="btn btn-sm btn-primary" type="submit">Update</button>
+                  </form>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <p>No appointments found.</p>
+      {% endif %}
+    </div>
+  </body>
+</html>
